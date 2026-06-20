@@ -201,3 +201,69 @@ Assina só `tokenId:window` com janela ±1 (~90s) e não vincula a evento/portad
 O lado positivo: o uso de OpenZeppelin está correto (ReentrancyGuard + checks-effects-interactions nos contratos de pagamento, ERC-2981 com royalty imutável anti-manipulação em [TicketResale.sol:190](vscode-webview://0pq9c75jlufe4hmtsljtsf0f98iivk4qlnubsuggusnobqlpnch2/shaar/smart_contracts/src/TicketResale.sol#L190), SafeERC20, soulbound pós-freeze). Os problemas são de **interação entre contratos** (freeze×escrow), **confiança off-chain** (settler/webhook) e **autorização/validação no backend** — não de matemática de tokens.
 
 Quer que eu **aplique as correções** de algum desses (sugiro começar por #1, #2 e #3), ou prefere que eu detalhe o patch de algum item específico antes?
+
+
+🟠 Médio
+M1 — QR de check-in replayável
+checkin/route.ts · me/tickets/[tokenId]/qr/route.ts
+Assina só tokenId:window (~90s de validade). Print da tela antes do evento = outra pessoa entra. Comparação de HMAC não é constant-time (sig !== expectedSig). Fix: vincular ao userId/sessão + crypto.timingSafeEqual.
+
+M2 — Refund marca REFUNDED mesmo se o estorno falhar
+webhooks/psp/route.ts:151
+O psp.refund() pode lançar, o catch só faz console.error, e logo depois grava REFUNDED de qualquer jeito. Comprador pode nunca ser estornado. O status FAILED existe no enum mas nunca é usado.
+
+M3 — Purchase presa em MINTING sem retry
+webhooks/psp/route.ts:50,87
+Se o processo travar entre marcar MINTING e confirmar o mint/settle, a purchase fica presa para sempre (o guard de idempotência só reprocessa PENDING). Não tem job de reconciliação.
+
+M4 — _buyListed (cripto) não respeita o lock
+TicketResale.sol:184
+Um comprador cripto-direto pode "snipear" uma listagem que está com PSP checkout em andamento (locked=true), porque _buyListed só checa l.active. Fix: require(!l.locked, "Listing locked") em _buyListed.
+
+M5 — auth/sync sobrescreve carteira a cada login
+auth/sync/route.ts:18
+Pega a primeira wallet da lista (pode não ser a embedded) e reescreve walletAddress a cada sync. Se o usuário vincular outra wallet, queries de titularidade quebram. upsert em campo @unique duplicado estoura 500 sem tratar.
+
+M6 — !event.onchainEventId trata 0 como "não on-chain"
+admin/events/[id]/pause/route.ts:18
+onchainEventId pode legitimamente ser 0 (primeiro evento criado). Usar ! em vez de === null significa que o evento 0 nunca é pausado/reconhecido on-chain. Os outros routes já usam === null corretamente — só o pause está errado.
+
+🟡 Baixo
+L1 — Pagamentos ETH via .call podem griefer toda uma venda/swap
+TicketSale.sol:195 · TicketSwap.sol:166 · RoyaltySplitter.sol:49
+Se o endereço do organizer for um contrato que reverta ao receber ETH, toda a transação falha (compra, swap, royalty). Pull-payment seria o padrão seguro.
+
+L2 — Indexer começa em head-1 sem deployment block
+indexer.ts:15
+No primeiro boot sem SyncState, o indexer perde todos os eventos históricos. Precisa ser semeado com o bloco do deploy.
+
+L3 — Indexer grava endereço do contrato de escrow como ownerAddress
+indexer.ts:95
+O handler de Transfer atualiza ownerAddress para qualquer destino — incluindo a transferência para o contrato TicketResale ao listar. Durante a listagem, o dono no DB vira o contrato, o que confunde queries de titularidade.
+
+L4 — Admin: status em query string sem validação → 500 do Prisma
+admin/events/route.ts · admin/organizers/route.ts
+status as "PENDING"|... não valida o valor; status inválido joga um erro interno do Prisma em vez de um 400 limpo.
+
+L5 — Loop de freeze sem paginação e não atômico
+admin/events/[id]/freeze/route.ts
+Itera todos os ingressos sequencialmente numa request HTTP. Para eventos grandes pode timeout na metade, deixando o evento parcialmente frozen sem rollback.
+
+L6 — TicketSwap não está deployado
+Deploy.s.sol
+O contrato existe e tem testes, mas não é deployado nem tem MINTER_ROLE/settler configurado. Funcionalidade inacessível.
+
+
+
+
+
+
+
+
+M1 — conectividade ruim do validador: O ponto que você levanta é real. A solução segura é: o validador só mostra "OK" após receber confirmação do servidor — se a conexão cair antes da resposta chegar, mostra erro. Conectividade ruim = pessoa espera ou vai para outro validador. Fazer validação otimista (OK sem confirmação) é exatamente o buraco. Prossigo com essa semântica?
+
+M5 — o que está acontecendo: O Privy retorna uma lista de wallets do usuário (pode ter a embedded wallet + wallets externas vinculadas). O código pega wallets[0] sem verificar qual é qual, e sobrescreve walletAddress no DB a cada login. O problema: se o usuário vincular uma carteira externa, a ordem da lista pode mudar — wallets[0] vira a externa, e o DB passa a ter o endereço errado. Aí todas as queries de "quais ingressos pertencem a esse usuário" (que comparam walletAddress) quebram silenciosamente. Fix: buscar explicitamente a wallet com type === 'privy' (embedded) e só atualizar se o campo ainda estiver nulo.
+
+L1 — pull-payment: Imagine que o organizador usa uma multisig (contrato) como carteira. Quando alguém compra um ingresso, o contrato tenta enviar ETH para o organizador no mesmo momento. Se o contrato do organizador rejeitar ETH (muitas multisigs fazem isso sem receive()), a transação inteira reverte — ninguém consegue comprar. Pull-payment inverte: em vez de empurrar ETH na hora, registra o saldo devedor. O organizador chama withdraw() quando quiser. Um organizador problemático não bloqueia mais os compradores.
+
+L6 — concordo, vamos pensar depois.
