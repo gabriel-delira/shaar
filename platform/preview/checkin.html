@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-in — Shaar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html">Eventos</a>
+    <a href="mercado.html">Mercado</a>
+    <a href="ingressos.html">Meus Ingressos</a>
+    <a href="organizador.html">Organizador</a>
+    <a href="admin.html">Admin</a>
+    <a href="checkin.html" class="active">Check-in</a>
+  </nav>
+  <span class="badge purple">STAFF · Portão A</span>
+</header>
+
+<main class="container">
+  <div class="checkin-wrap">
+    <h1 class="page-title">Show da Banda Aurora</h1>
+    <p class="page-sub">12/08/2026 · entradas <b style="color:var(--green);">96</b> de 142 vendidos</p>
+
+    <div class="scanner">
+      <div style="font-size:44px;">📷</div>
+      <div>Aponte a câmera pro QR do ingresso</div>
+      <a class="btn sm secondary" href="#">digitar código manualmente</a>
+    </div>
+
+    <!-- Resultado: válido -->
+    <div class="result ok">
+      <h3>✓ Entrada liberada</h3>
+      <div class="meta" style="line-height:1.9;">
+        <b style="color:var(--text)">Ingresso #143</b> · Pista<br>
+        Check-in às 19:42 · Portão A
+      </div>
+    </div>
+
+    <!-- Resultado: já usado -->
+    <div class="result fail">
+      <h3>✗ Entrada negada — QR já utilizado</h3>
+      <div class="meta" style="line-height:1.9;">
+        <b style="color:var(--text)">Ingresso #088</b> · check-in anterior às 19:15 (Portão B)<br>
+        Possível tentativa de reuso de print. Encaminhar pra supervisão.
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>preview estático · tela pensada pra celular do staff na porta do evento</footer>
+</body>
+</html>

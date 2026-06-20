@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Show da Banda Aurora — Shaar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html" class="active">Eventos</a>
+    <a href="mercado.html">Mercado</a>
+    <a href="ingressos.html">Meus Ingressos</a>
+    <a href="organizador.html">Organizador</a>
+    <a href="admin.html">Admin</a>
+    <a href="checkin.html">Check-in</a>
+  </nav>
+  <button class="btn">Entrar com email</button>
+</header>
+
+<main class="container">
+  <div class="banner g1">🎸 Show da Banda Aurora</div>
+
+  <div class="detail">
+    <div>
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-head">Sobre o evento</div>
+        <div class="panel-body meta" style="font-size:14px; line-height:1.8;">
+          A turnê "Horizonte" chega a São Paulo com produção inédita. Seu ingresso é digital e verificável
+          — funciona como entrada no dia do show e vira uma lembrança do evento depois.<br><br>
+          📅 <b style="color:var(--text)">12/08/2026 às 20h</b> · abertura dos portões 18h<br>
+          📍 Allianz Parque — Av. Francisco Matarazzo, 1705 — São Paulo, SP<br>
+          🪪 Classificação: 16 anos
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Organizador</div>
+        <div class="panel-body" style="display:flex; align-items:center; gap:14px;">
+          <div class="thumb g2" style="width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;">🏢</div>
+          <div>
+            <b>Produtora ABC</b> <span class="badge purple">VERIFICADO</span>
+            <div class="meta">14 eventos realizados na plataforma</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <div class="panel-head">Comprar ingresso</div>
+        <div class="panel-body">
+          <div class="price" style="font-size:26px;">R$ 250</div>
+          <div class="meta" style="margin-bottom:14px;">PIX ou cartão — ingresso entregue na hora</div>
+
+          <div class="meta" style="margin-bottom:6px;">Disponibilidade</div>
+          <div class="split-bar" style="margin-top:0;">
+            <div class="s2" style="width:28%"></div>
+            <div style="background:var(--surface-2); width:72%"></div>
+          </div>
+          <div class="meta" style="margin-bottom:16px;">142 vendidos · <b style="color:var(--text)">358 de 500 disponíveis</b></div>
+
+          <a class="btn" style="width:100%; text-align:center;" href="#modal-compra">Comprar ingresso</a>
+
+          <div class="meta" style="margin-top:14px; font-size:12px;">
+            🔁 Pode revender no <a href="mercado.html" style="color:var(--accent-2);">mercado oficial</a> se não puder ir.<br>
+            💳 Pague em R$ (PIX ou cartão) ou em USDC.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal de checkout -->
+<div class="modal" id="modal-compra">
+  <div class="box">
+    <h3>Confirmar compra</h3>
+    <div class="meta" style="line-height:2;">
+      Show da Banda Aurora · 12/08/2026<br>
+      Ingresso <b style="color:var(--text)">#143 de 500</b> · Setor: Pista
+    </div>
+    <hr style="border-color:var(--border); margin:12px 0;">
+    <div class="meta" style="margin-bottom:8px;">Forma de pagamento</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <label class="split" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="radio" name="pay" checked> <b>PIX</b> — R$ 250,00 <span class="badge green" style="margin-left:auto;">na hora</span>
+      </label>
+      <label class="split" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="radio" name="pay"> <b>Cartão de crédito</b> — R$ 250,00
+      </label>
+      <label class="split" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="radio" name="pay"> <b>USDC</b> — 45,40
+      </label>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:18px;">
+      <a class="btn green" style="flex:1; text-align:center;" href="ingressos.html">Pagar</a>
+      <a class="btn ghost" href="#">Cancelar</a>
+    </div>
+  </div>
+</div>
+
+<footer>preview estático · o botão "Confirmar" simula a compra e leva para Meus Ingressos</footer>
+</body>
+</html>

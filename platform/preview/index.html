@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shaar — Eventos</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html" class="active">Eventos</a>
+    <a href="mercado.html">Mercado</a>
+    <a href="ingressos.html">Meus Ingressos</a>
+    <a href="organizador.html">Organizador</a>
+    <a href="admin.html">Admin</a>
+    <a href="checkin.html">Check-in</a>
+  </nav>
+  <button class="btn">Entrar com email</button>
+</header>
+
+<main class="container">
+  <h1 class="page-title">Próximos eventos</h1>
+  <p class="page-sub">Compre, revenda ou guarde como lembrança.</p>
+
+  <div class="filters">
+    <input type="text" placeholder="Buscar evento, artista, local...">
+    <select><option>Todas as cidades</option><option>São Paulo</option><option>Rio de Janeiro</option></select>
+    <select><option>Qualquer data</option><option>Este mês</option><option>Próximos 3 meses</option></select>
+  </div>
+
+  <div class="grid">
+    <a class="card" href="evento.html">
+      <div class="cover g1">🎸</div>
+      <div class="body">
+        <span class="badge green">VENDAS ABERTAS</span>
+        <h3 style="margin-top:8px;">Show da Banda Aurora</h3>
+        <div class="meta">📅 12/08/2026 · 20h<br>📍 Allianz Parque — São Paulo, SP<br>🎟️ 358 de 500 disponíveis</div>
+        <div class="price-row">
+          <div class="price">R$ 250</div>
+          <span class="btn sm">Comprar</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="evento.html">
+      <div class="cover g2">🎪</div>
+      <div class="body">
+        <span class="badge red">ESGOTADO</span>
+        <h3 style="margin-top:8px;">Festival Maré Alta</h3>
+        <div class="meta">📅 20/09/2026 · 14h<br>📍 Marina da Glória — Rio de Janeiro, RJ<br>🎟️ 0 de 2.000 disponíveis</div>
+        <div class="price-row">
+          <div class="price">R$ 480</div>
+          <span class="btn sm secondary">Ver mercado</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="evento.html">
+      <div class="cover g3">💻</div>
+      <div class="body">
+        <span class="badge green">VENDAS ABERTAS</span>
+        <h3 style="margin-top:8px;">Conf. Web3 Brasil</h3>
+        <div class="meta">📅 03/10/2026 · 9h<br>📍 Expo Center Norte — São Paulo, SP<br>🎟️ 211 de 300 disponíveis</div>
+        <div class="price-row">
+          <div class="price">R$ 120</div>
+          <span class="btn sm">Comprar</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="card" href="evento.html">
+      <div class="cover g4">🎭</div>
+      <div class="body">
+        <span class="badge yellow">PAUSADO</span>
+        <h3 style="margin-top:8px;">Peça: O Último Bloco</h3>
+        <div class="meta">📅 15/11/2026 · 19h<br>📍 Teatro Riachuelo — São Paulo, SP<br>🎟️ vendas temporariamente pausadas</div>
+        <div class="price-row">
+          <div class="price">R$ 90</div>
+          <span class="btn sm" style="opacity:.4;">Indisponível</span>
+        </div>
+      </div>
+    </a>
+  </div>
+</main>
+
+<footer>preview estático · Shaar</footer>
+</body>
+</html>

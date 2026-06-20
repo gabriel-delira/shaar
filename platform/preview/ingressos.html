@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meus Ingressos — Shaar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html">Eventos</a>
+    <a href="mercado.html">Mercado</a>
+    <a href="ingressos.html" class="active">Meus Ingressos</a>
+    <a href="organizador.html">Organizador</a>
+    <a href="admin.html">Admin</a>
+    <a href="checkin.html">Check-in</a>
+  </nav>
+  <span class="badge purple">gabriel@email.com</span>
+</header>
+
+<main class="container" style="max-width:860px;">
+  <h1 class="page-title">Meus Ingressos</h1>
+
+  <!-- Saldo de revendas -->
+  <div class="ticket" style="border-color:rgba(46,204,113,.4);">
+    <div class="thumb" style="background:rgba(46,204,113,.12); font-size:24px;">💰</div>
+    <div class="info">
+      <h3>Saldo de vendas: R$ 165,00</h3>
+      <div class="meta">Proventos de revendas. Saque pra sua conta via PIX ou use pra comprar ingressos.</div>
+    </div>
+    <div class="actions">
+      <a class="btn sm green" href="#modal-saque">Sacar via PIX</a>
+    </div>
+  </div>
+
+  <!-- Ingresso válido -->
+  <div class="ticket">
+    <div class="thumb g1">🎸</div>
+    <div class="info">
+      <h3>Show da Banda Aurora <span class="badge green">VÁLIDO</span></h3>
+      <div class="meta">
+        Ingresso <b style="color:var(--text)">#143 de 500</b> · Pista · 12/08/2026 20h<br>
+        comprado por R$ 250
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn sm" href="#modal-qr">Ver QR</a>
+      <a class="btn sm secondary" href="#modal-revenda">Revender</a>
+    </div>
+  </div>
+
+  <!-- Ingresso listado -->
+  <div class="ticket">
+    <div class="thumb g3">💻</div>
+    <div class="info">
+      <h3>Conf. Web3 Brasil <span class="badge yellow">À VENDA NO MERCADO</span></h3>
+      <div class="meta">
+        Ingresso <b style="color:var(--text)">#27 de 300</b> · Credencial · 03/10/2026 9h<br>
+        Listado por <b style="color:var(--text)">R$ 165,00</b> · expira em 6 dias
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn sm danger" href="#">Cancelar listagem</a>
+      <a class="btn sm ghost" href="mercado.html">ver no mercado</a>
+    </div>
+  </div>
+
+  <!-- Ingresso lembrança -->
+  <div class="ticket frozen">
+    <div class="thumb g2">🎪</div>
+    <div class="info">
+      <h3>Festival Maré Alta 2025 <span class="badge gray">🔒 LEMBRANÇA</span></h3>
+      <div class="meta">
+        Ingresso <b style="color:var(--text)">#87 de 2.000</b> · check-in em 21/09/2025 14:32<br>
+        Lembrança do evento — não pode ser revendido
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal QR -->
+<div class="modal" id="modal-qr">
+  <div class="box" style="text-align:center;">
+    <h3>Show da Banda Aurora — #143</h3>
+    <div class="qr"></div>
+    <div class="meta" style="margin-top:14px;">
+      QR rotativo — expira em <b style="color:var(--yellow)">0:47</b><br>
+      Apresente na entrada. Não compartilhe print.
+    </div>
+    <a class="btn ghost" style="margin-top:16px;" href="#">Fechar</a>
+  </div>
+</div>
+
+<!-- Modal Revenda -->
+<div class="modal" id="modal-revenda">
+  <div class="box">
+    <h3>Revender ingresso #143</h3>
+    <div class="meta" style="margin-bottom:10px;">Show da Banda Aurora · preço original: R$ 250</div>
+    <label class="meta">Preço de venda (R$)</label>
+    <input class="field" style="width:100%; margin:6px 0 14px;" value="308,00">
+    <label class="meta">Expira em</label>
+    <select class="field" style="width:100%; margin:6px 0 14px;">
+      <option>7 dias</option><option>24 horas</option><option>Sem expiração</option>
+    </select>
+    <div class="split">
+      Você recebe se vender:
+      <div class="split-bar">
+        <div class="s1" style="width:85%"></div>
+        <div class="s2" style="width:10%"></div>
+        <div class="s3" style="width:5%"></div>
+      </div>
+      <b>R$ 261,80</b> você (85%) · <b>R$ 30,80</b> royalty organizador (10%) · <b>R$ 15,40</b> plataforma (5%)
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <a class="btn" style="flex:1; text-align:center;" href="mercado.html">Listar no mercado</a>
+      <a class="btn ghost" href="#">Cancelar</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Saque PIX -->
+<div class="modal" id="modal-saque">
+  <div class="box">
+    <h3>Sacar via PIX</h3>
+    <div class="meta" style="margin-bottom:12px;">Saldo disponível: <b style="color:var(--text)">R$ 165,00</b></div>
+    <label class="meta">Valor do saque (R$)</label>
+    <input class="field" style="width:100%; margin:6px 0 12px;" value="165,00">
+    <label class="meta">Chave PIX</label>
+    <input class="field" style="width:100%; margin:6px 0 14px;" placeholder="CPF, email ou chave aleatória">
+    <div class="split">
+      Taxa de conversão: <b>1%</b> · Você recebe: <b>R$ 163,35</b>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <a class="btn green" style="flex:1; text-align:center;" href="#">Confirmar saque</a>
+      <a class="btn ghost" href="#">Cancelar</a>
+    </div>
+    <div class="meta" style="font-size:11px; margin-top:12px;">
+      Exige verificação de identidade no primeiro saque.
+    </div>
+  </div>
+</div>
+
+<footer>preview estático · "Ver QR", "Revender" e "Sacar via PIX" abrem modais de exemplo</footer>
+</body>
+</html>

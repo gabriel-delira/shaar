@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard do Organizador — Shaar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html">Eventos</a>
+    <a href="mercado.html">Mercado</a>
+    <a href="ingressos.html">Meus Ingressos</a>
+    <a href="organizador.html" class="active">Organizador</a>
+    <a href="admin.html">Admin</a>
+    <a href="checkin.html">Check-in</a>
+  </nav>
+  <span class="badge purple">Produtora ABC ✓</span>
+</header>
+
+<main class="container">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+    <h1 class="page-title">Dashboard do Organizador</h1>
+    <a class="btn" href="#modal-novo">+ Novo evento</a>
+  </div>
+  <p class="page-sub">Repasses a cada venda — sem D+30, sem intermediário.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Receita primária (total)</div>
+      <div class="value">R$ 174.920</div>
+      <div class="delta">+ R$ 12.485 esta semana</div>
+    </div>
+    <div class="stat">
+      <div class="label">Royalties de revenda</div>
+      <div class="value">R$ 6.677</div>
+      <div class="delta">+ R$ 528 esta semana</div>
+    </div>
+    <div class="stat">
+      <div class="label">Ingressos vendidos</div>
+      <div class="value">2.142</div>
+      <div class="delta">3 eventos ativos</div>
+    </div>
+    <div class="stat">
+      <div class="label">Próximo repasse</div>
+      <div class="value" style="font-size:15px;">R$ 35.458</div>
+      <div class="delta" style="color:var(--muted);">Show da Banda Aurora</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">Meus eventos</div>
+    <table>
+      <tr><th>Evento</th><th>Data</th><th>Status</th><th>Vendidos</th><th>Receita</th><th>Royalties</th><th></th></tr>
+      <tr>
+        <td><b>Show da Banda Aurora</b></td><td>12/08/2026</td>
+        <td><span class="badge green">EM VENDA</span></td>
+        <td>142 / 500</td><td>R$ 35.458</td><td>—</td>
+        <td><a class="btn sm ghost" href="#">detalhes</a></td>
+      </tr>
+      <tr>
+        <td><b>Festival Maré Alta</b></td><td>20/09/2026</td>
+        <td><span class="badge red">ESGOTADO</span></td>
+        <td>2.000 / 2.000</td><td>R$ 139.661</td><td>R$ 6.677</td>
+        <td><a class="btn sm ghost" href="#">detalhes</a></td>
+      </tr>
+      <tr>
+        <td><b>Aurora — Tour 2027</b></td><td>14/03/2027</td>
+        <td><span class="badge yellow">AGUARDANDO APROVAÇÃO</span></td>
+        <td>—</td><td>—</td><td>—</td>
+        <td><a class="btn sm ghost" href="#">editar</a></td>
+      </tr>
+      <tr>
+        <td><b>Festival Maré Alta 2025</b></td><td>21/09/2025</td>
+        <td><span class="badge gray">🔒 ENCERRADO</span></td>
+        <td>2.000 / 2.000</td><td>R$ 127.050</td><td>R$ 15.790</td>
+        <td><a class="btn sm ghost" href="#">relatório</a></td>
+      </tr>
+    </table>
+  </div>
+</main>
+
+<!-- Modal novo evento -->
+<div class="modal" id="modal-novo">
+  <div class="box" style="width:480px;">
+    <h3>Novo evento</h3>
+    <div class="meta" style="margin-bottom:14px;">Após enviar, o evento vai pra fila de aprovação da plataforma. A aprovação publica o evento e abre as vendas.</div>
+    <label class="meta">Nome do evento</label>
+    <input class="field" style="width:100%; margin:6px 0 10px;" placeholder="Ex.: Aurora — Tour 2027">
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;">
+        <label class="meta">Data e hora</label>
+        <input class="field" style="width:100%; margin:6px 0 10px;" value="14/03/2027 21:00">
+      </div>
+      <div style="flex:1;">
+        <label class="meta">Capacidade (máx. ingressos)</label>
+        <input class="field" style="width:100%; margin:6px 0 10px;" value="500">
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;">
+        <label class="meta">Preço (R$)</label>
+        <input class="field" style="width:100%; margin:6px 0 10px;" value="250,00">
+      </div>
+      <div style="flex:1;">
+        <label class="meta">Royalty de revenda</label>
+        <select class="field" style="width:100%; margin:6px 0 10px;">
+          <option>10%</option><option>5%</option><option>0%</option>
+        </select>
+      </div>
+    </div>
+    <label class="meta">Local</label>
+    <input class="field" style="width:100%; margin:6px 0 14px;" placeholder="Casa de show, endereço, cidade">
+    <div class="split">Taxa da plataforma na venda primária: <b>8%</b> (definida no seu contrato comercial)</div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <a class="btn" style="flex:1; text-align:center;" href="admin.html">Enviar pra aprovação</a>
+      <a class="btn ghost" href="#">Cancelar</a>
+    </div>
+  </div>
+</div>
+
+<footer>preview estático · "Enviar pra aprovação" leva pro painel admin</footer>
+</body>
+</html>

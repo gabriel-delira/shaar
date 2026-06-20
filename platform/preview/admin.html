@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Admin — Shaar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html">Eventos</a>
+    <a href="mercado.html">Mercado</a>
+    <a href="ingressos.html">Meus Ingressos</a>
+    <a href="organizador.html">Organizador</a>
+    <a href="admin.html" class="active">Admin</a>
+    <a href="checkin.html">Check-in</a>
+  </nav>
+  <span class="badge red">ADMIN</span>
+</header>
+
+<main class="container">
+  <h1 class="page-title">Painel da Plataforma</h1>
+  <p class="page-sub">Aprovações publicam o evento e abrem as vendas.</p>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="label">Receita plataforma (mês)</div>
+      <div class="value">R$ 26.466</div>
+      <div class="delta">primária + revenda</div>
+    </div>
+    <div class="stat">
+      <div class="label">Eventos ativos</div>
+      <div class="value">7</div>
+    </div>
+    <div class="stat">
+      <div class="label">Pendências</div>
+      <div class="value" style="color:var(--yellow);">3</div>
+      <div class="delta" style="color:var(--muted);">2 eventos · 1 organizador</div>
+    </div>
+    <div class="stat">
+      <div class="label">Sistema</div>
+      <div class="value" style="color:var(--green); font-size:16px;">● operacional</div>
+      <div class="delta" style="color:var(--muted);">sincronizado</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:24px;">
+    <div class="panel-head">⏳ Fila de aprovação — Eventos</div>
+    <table>
+      <tr><th>Evento</th><th>Organizador</th><th>Data</th><th>Preço</th><th>Capacidade</th><th>Royalty</th><th>Ações</th></tr>
+      <tr>
+        <td><b>Aurora — Tour 2027</b></td>
+        <td>Produtora ABC ✓</td>
+        <td>14/03/2027</td><td>R$ 250</td><td>500</td><td>10%</td>
+        <td>
+          <a class="btn sm green" href="#modal-aprovar">Aprovar</a>
+          <a class="btn sm danger" href="#">Rejeitar</a>
+        </td>
+      </tr>
+      <tr>
+        <td><b>Stand-up do Zé</b></td>
+        <td>Zé Produções <span class="badge yellow">NOVO</span></td>
+        <td>02/12/2026</td><td>R$ 100</td><td>150</td><td>5%</td>
+        <td>
+          <a class="btn sm green" href="#modal-aprovar">Aprovar</a>
+          <a class="btn sm danger" href="#">Rejeitar</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="panel" style="margin-bottom:24px;">
+    <div class="panel-head">⏳ Fila de aprovação — Organizadores</div>
+    <table>
+      <tr><th>Empresa</th><th>CNPJ</th><th>Contato</th><th>Ações</th></tr>
+      <tr>
+        <td><b>Zé Produções</b></td>
+        <td>12.345.678/0001-90</td>
+        <td>ze@zeproducoes.com</td>
+        <td>
+          <a class="btn sm green" href="#">Aprovar</a>
+          <a class="btn sm danger" href="#">Rejeitar</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">Eventos ativos</div>
+    <table>
+      <tr><th>Evento</th><th>Status</th><th>Vendidos</th><th>Ações</th></tr>
+      <tr>
+        <td>Festival Maré Alta 2025</td>
+        <td><span class="badge gray">🔒 ENCERRADO</span></td>
+        <td>2.000/2.000</td>
+        <td><span class="meta">encerrado</span></td>
+      </tr>
+      <tr>
+        <td>Show da Banda Aurora</td>
+        <td><span class="badge green">EM VENDA</span></td>
+        <td>142/500</td>
+        <td><a class="btn sm ghost" href="#">⏸ pausar vendas</a></td>
+      </tr>
+      <tr>
+        <td>Festival Maré Alta</td>
+        <td><span class="badge red">ESGOTADO</span></td>
+        <td>2.000/2.000</td>
+        <td><a class="btn sm ghost" href="#">encerrar evento</a></td>
+      </tr>
+      <tr>
+        <td>Peça: O Último Bloco</td>
+        <td><span class="badge yellow">PAUSADO</span></td>
+        <td>12/200</td>
+        <td><a class="btn sm ghost" href="#">▶ retomar vendas</a></td>
+      </tr>
+    </table>
+  </div>
+</main>
+
+<!-- Modal aprovação -->
+<div class="modal" id="modal-aprovar">
+  <div class="box">
+    <h3>Aprovar e publicar evento</h3>
+    <div class="meta" style="line-height:2;">
+      <b style="color:var(--text)">Aurora — Tour 2027</b> · Produtora ABC<br>
+      Preço: R$ 250 · 500 ingressos<br>
+      Taxa plataforma: 8% · Royalty revenda: 10%
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <a class="btn green" style="flex:1; text-align:center;" href="index.html">Aprovar e publicar</a>
+      <a class="btn ghost" href="#">Cancelar</a>
+    </div>
+  </div>
+</div>
+
+<footer>preview estático · "Aprovar e publicar" simula o createEvent e volta pro catálogo</footer>
+</body>
+</html>

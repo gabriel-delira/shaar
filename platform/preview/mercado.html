@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercado de Revenda — Shaar</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="logo" href="index.html">◆ <span>Shaar</span></a>
+  <nav class="nav">
+    <a href="index.html">Eventos</a>
+    <a href="mercado.html" class="active">Mercado</a>
+    <a href="ingressos.html">Meus Ingressos</a>
+    <a href="organizador.html">Organizador</a>
+    <a href="admin.html">Admin</a>
+    <a href="checkin.html">Check-in</a>
+  </nav>
+  <a class="btn secondary" href="ingressos.html">+ Revender meu ingresso</a>
+</header>
+
+<main class="container">
+  <h1 class="page-title">Mercado de revenda</h1>
+  <p class="page-sub">Compra segura entre pessoas — o pagamento é distribuído automaticamente entre vendedor, organizador e plataforma.</p>
+
+  <div class="filters">
+    <input type="text" placeholder="Buscar evento...">
+    <select><option>Todos os eventos</option><option>Festival Maré Alta</option><option>Show da Banda Aurora</option><option>Conf. Web3 Brasil</option></select>
+    <select><option>Menor preço</option><option>Maior preço</option><option>Expira primeiro</option></select>
+  </div>
+
+  <div class="panel" style="margin-bottom:24px;">
+    <div class="panel-head">🎪 Festival Maré Alta — 20/09/2026 <span class="badge red" style="margin-left:8px;">PRIMÁRIA ESGOTADA</span></div>
+    <table>
+      <tr><th>Ingresso</th><th>Setor</th><th>Preço</th><th>Você recebe</th><th>Expira</th><th></th></tr>
+      <tr>
+        <td><b>#201</b></td><td>Pista</td>
+        <td><b>R$ 528,00</b><br><span class="meta">preço original: R$ 480</span></td>
+        <td class="meta">R$ 448,80 (85%)</td>
+        <td class="meta">3 dias</td>
+        <td><a class="btn sm" href="#modal-buy">Comprar</a></td>
+      </tr>
+      <tr>
+        <td><b>#1.044</b></td><td>Pista</td>
+        <td><b>R$ 605,00</b><br><span class="meta">preço original: R$ 480</span></td>
+        <td class="meta">R$ 514,25 (85%)</td>
+        <td class="meta">12 horas</td>
+        <td><a class="btn sm" href="#modal-buy">Comprar</a></td>
+      </tr>
+      <tr>
+        <td><b>#312</b></td><td>VIP</td>
+        <td><b>R$ 990,00</b><br><span class="meta">preço original: R$ 781</span></td>
+        <td class="meta">R$ 841,50 (85%)</td>
+        <td class="meta">sem expiração</td>
+        <td><a class="btn sm" href="#modal-buy">Comprar</a></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">💻 Conf. Web3 Brasil — 03/10/2026</div>
+    <table>
+      <tr><th>Ingresso</th><th>Setor</th><th>Preço</th><th>Você recebe</th><th>Expira</th><th></th></tr>
+      <tr>
+        <td><b>#27</b></td><td>Credencial</td>
+        <td><b>R$ 165,00</b><br><span class="meta">preço original: R$ 120</span></td>
+        <td class="meta"><span class="badge purple">SEU INGRESSO</span></td>
+        <td class="meta">6 dias</td>
+        <td><a class="btn sm danger" href="ingressos.html">Cancelar</a></td>
+      </tr>
+    </table>
+  </div>
+</main>
+
+<!-- Modal compra revenda -->
+<div class="modal" id="modal-buy">
+  <div class="box">
+    <h3>Comprar ingresso #201</h3>
+    <div class="meta" style="line-height:2;">
+      Festival Maré Alta · 20/09/2026 · Pista
+    </div>
+    <div class="split" style="margin:14px 0;">
+      Total <b>R$ 528,00</b> — distribuído automaticamente:
+      <div class="split-bar">
+        <div class="s1" style="width:85%"></div>
+        <div class="s2" style="width:10%"></div>
+        <div class="s3" style="width:5%"></div>
+      </div>
+      <b>R$ 448,80</b> vendedor · <b>R$ 52,80</b> royalty organizador · <b>R$ 26,40</b> plataforma
+    </div>
+    <div class="meta" style="margin-bottom:8px;">Forma de pagamento</div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <label class="split" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="radio" name="pay2" checked> <b>PIX</b> — R$ 528,00 <span class="badge green" style="margin-left:auto;">na hora</span>
+      </label>
+      <label class="split" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="radio" name="pay2"> <b>Cartão de crédito</b> — R$ 528,00
+      </label>
+      <label class="split" style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+        <input type="radio" name="pay2"> <b>USDC</b> — 96,00
+      </label>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:16px;">
+      <a class="btn green" style="flex:1; text-align:center;" href="ingressos.html">Pagar</a>
+      <a class="btn ghost" href="#">Cancelar</a>
+    </div>
+  </div>
+</div>
+
+<footer>preview estático · royalty de revenda é repassado automaticamente ao organizador</footer>
+</body>
+</html>
