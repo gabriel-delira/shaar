@@ -27,7 +27,7 @@ Plataforma B2B2C de venda de ingressos digitais verificáveis. Organizadores cad
 
 | Contrato | Papel |
 |---|---|
-| `TicketNFT.sol` | NFT ERC-721 base — mint, transferência, freeze pós-evento, metadados |
+| `TicketNFTLocked.sol` | NFT ERC-721 base — mint, freeze pós-evento, metadados; transfers restritos à plataforma |
 | `TicketSale.sol` | Venda primária — `createEvent`, `buyTicket`, `buyTicketFor` (fiat-first) |
 | `TicketResale.sol` | Mercado secundário — `listTicket`, `buyListedTicket`, `buyListedTicketFor` (fiat-first) |
 | `RoyaltySplitter.sol` | Split de royalties por evento (organizador + plataforma) |
@@ -36,7 +36,7 @@ Plataforma B2B2C de venda de ingressos digitais verificáveis. Organizadores cad
 
 **Ajustes já implementados (12/06/2026):**
 - `buyTicketFor(eventId, recipient)` e `buyListedTicketFor(listingId, recipient)` — permitem que a tesouraria execute compras fiat-first mintando direto pro comprador.
-- Bug de URI corrigido no `TicketNFT.freeze` — URI congelada agora é armazenada e retornada de forma independente, sem concatenação com `baseURI`.
+- Bug de URI corrigido no `TicketNFT.freeze` (herdado em `TicketNFTLocked`) — URI congelada agora é armazenada e retornada de forma independente, sem concatenação com `baseURI`.
 
 ---
 

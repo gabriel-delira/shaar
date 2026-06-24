@@ -48,9 +48,9 @@ Etapas de execução (list): valida posse + aprovação → transfere NFT para e
 Eventos emitidos: `TicketListed`, `ListingCancelled`
 
 ### Freeze de metadata
-Função de entrada: `TicketNFT.freeze(tokenId, finalURI)`
+Função de entrada: `TicketNFTLocked.freeze(tokenId, finalURI)`
 Quem pode chamar: `OPERATOR_ROLE` (platformWallet)
-Etapas de execução: marca `frozen[tokenId]` e fixa `_frozenURI` (CID IPFS imutável). O token continua transferível.
+Etapas de execução: marca `frozen[tokenId]` e fixa `_frozenURI` (CID IPFS imutável). O token continua transferível via contratos da plataforma (pode ser revendido como colecionável); só os metadados ficam bloqueados.
 Eventos emitidos: `Frozen`
 
 ### Swap atômico

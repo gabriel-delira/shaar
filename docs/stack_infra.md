@@ -15,8 +15,8 @@
 
 | Contrato | Responsabilidade |
 |---|---|
-| `TicketNFT.sol` | ERC-721 + ERC-721URIStorage + ERC-2981 + AccessControl. Mint, metadata por token, freeze (pin de URI), roles `MINTER_ROLE` / `OPERATOR_ROLE`. Não recebe pagamento. |
-| `TicketSale.sol` | Venda primária. `Ownable` + `Pausable` + `ReentrancyGuard`. Cria eventos, faz split organizador/plataforma e chama `TicketNFT.mint()`. Deploy de um `RoyaltySplitter` por evento. |
+| `TicketNFTLocked.sol` | ERC-721 + ERC-721URIStorage + ERC-2981 + AccessControl. Mint, metadata por token, freeze (pin de URI), roles `MINTER_ROLE` / `OPERATOR_ROLE`. Transfers restritos a contratos autorizados (`authorizedTransferor`). Não recebe pagamento. |
+| `TicketSale.sol` | Venda primária. `Ownable` + `Pausable` + `ReentrancyGuard`. Cria eventos, faz split organizador/plataforma e chama `TicketNFTLocked.mint()`. Deploy de um `RoyaltySplitter` por evento. |
 | `TicketResale.sol` | Mercado secundário com escrow do NFT. Split vendedor / royalty (ERC-2981) / plataforma. Suporta fluxo cripto direto e fluxo fiat via `lockListing`/`settleListedTicket` (gated por `settler`). |
 | `TicketSwap.sol` | Troca atômica de ingressos entre dois usuários + taxa. |
 | `RoyaltySplitter.sol` | Recebe royalties ERC-2981 e divide entre organizador e plataforma. |
@@ -31,7 +31,7 @@
 - **Privy** — autenticação de usuários e **Server Wallets** (assinatura on-chain server-side em testnet/mainnet). Carteiras embutidas são criadas para o usuário no primeiro login. `PRIVY_APP_SECRET` + `NEXT_PUBLIC_PRIVY_APP_ID`.
 - **PSP (gateway de pagamento)** — abstraído em `app/lib/psp` (`mock` | `pagarme` | `stripe`). Cria cobranças PIX/cartão e envia webhook de confirmação. Webhook verificado por assinatura (HMAC sobre o corpo cru).
 - **Feed de câmbio BRL/USDC** — hoje hardcoded em `app/lib/fx.ts` (`FX_MID_RATE` + `FX_SPREAD_BPS`); previsto trocar por feed real (Transfero/Bitso).
-- **IPFS** — usado conceitualmente no `freeze` do `TicketNFT` (pin de CID estático como URI final pós-evento); o pin em si é feito off-chain.
+- **IPFS** — usado conceitualmente no `freeze` do `TicketNFTLocked` (pin de CID estático como URI final pós-evento); o pin em si é feito off-chain.
 
 ## Como os serviços se comunicam
 

@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import "forge-std/Script.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../src/MockUSDC.sol";
-import "../src/TicketNFT.sol";
+import "../src/TicketNFTLocked.sol";
 import "../src/TicketSale.sol";
 import "../src/TicketResale.sol";
 
@@ -40,8 +40,8 @@ contract Deploy is Script {
         }
 
         // ── Core contracts ────────────────────────────────────────────────────────
-        TicketNFT nft = new TicketNFT();
-        console.log("TicketNFT deployed at:    ", address(nft));
+        TicketNFTLocked nft = new TicketNFTLocked();
+        console.log("TicketNFTLocked deployed at:", address(nft));
 
         TicketSale sale = new TicketSale(address(nft), platformWallet);
         console.log("TicketSale deployed at:   ", address(sale));
@@ -54,6 +54,14 @@ contract Deploy is Script {
         nft.grantRole(nft.OPERATOR_ROLE(), platformWallet);
         console.log("MINTER_ROLE  → TicketSale");
         console.log("OPERATOR_ROLE → platformWallet:", platformWallet);
+
+        // ── Authorized transferors (TicketNFTLocked) ──────────────────────────────
+        // Apenas contratos da plataforma podem mover NFTs; transfers diretos revertam.
+        nft.grantTransferor(address(sale));
+        nft.grantTransferor(address(resale));
+        console.log("authorizedTransferor → TicketSale");
+        console.log("authorizedTransferor → TicketResale");
+        // Se TicketSwap for deployado: nft.grantTransferor(address(swap));
 
         // ── baseURI ───────────────────────────────────────────────────────────────
         string memory baseURI = vm.envOr("BASE_URI", string("http://localhost:3000/api/metadata/"));

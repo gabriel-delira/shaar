@@ -21,7 +21,7 @@ anvil                           # node local em http://127.0.0.1:8545
 forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
 ```
 
-O deploy local: faz deploy de `MockUSDC`, `TicketNFT`, `TicketSale`, `TicketResale`, concede roles, define `baseURI`, registra o settler e grava os endereços em `app/lib/contracts/addresses.local.json`.
+O deploy local: faz deploy de `MockUSDC`, `TicketNFTLocked`, `TicketSale`, `TicketResale`, concede roles e transferors, define `baseURI`, registra o settler e grava os endereços em `app/lib/contracts/addresses.local.json`.
 
 ### 2. App (Next.js + Prisma)
 

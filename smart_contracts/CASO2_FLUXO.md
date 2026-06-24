@@ -3,7 +3,7 @@
 ## Contratos envolvidos
 
 ```
-TicketNFT.sol       → o ativo (o NFT em si)
+TicketNFTLocked.sol → o ativo (o NFT em si); transfers restritos à plataforma
 RoyaltySplitter.sol → divide royalties externas entre organizer e plataforma
 TicketSale.sol      → venda primária (lançamento)
 TicketResale.sol    → mercado secundário (revenda)
@@ -44,7 +44,7 @@ Comprador
         │     ├─ (100% - platformFee%) → Organizer
         │     └─ platformFee%          → Platform
         │
-        └─► TicketNFT.mint(MintParams)
+        └─► TicketNFTLocked.mint(MintParams)
               ├─ Minta NFT direto para o comprador
               ├─ Grava metadados: eventId, ticketNumber, seat, facePrice, organizer...
               └─ Define royaltyReceiver = RoyaltySplitter do evento (não o organizer direto)
@@ -60,7 +60,7 @@ Comprador
 
 ```
 Marketplace
-  └─► TicketNFT.royaltyInfo(tokenId, salePrice)
+  └─► TicketNFTLocked.royaltyInfo(tokenId, salePrice)
         └─ Retorna: (endereço do RoyaltySplitter, valor da royalty)
 
 Marketplace envia ETH da royalty → RoyaltySplitter.receive()
@@ -82,7 +82,7 @@ Marketplace envia ETH da royalty → RoyaltySplitter.receive()
 
 ```
 [1] Vendedor aprova TicketResale como operador do NFT
-      └─► TicketNFT.approve(TicketResale, tokenId)
+      └─► TicketNFTLocked.approve(TicketResale, tokenId)
 
 [2] Vendedor lista o ingresso
       └─► TicketResale.listTicket(tokenId, price, token, organizerRoyalty%, expiry)
@@ -97,7 +97,7 @@ Marketplace envia ETH da royalty → RoyaltySplitter.receive()
             │     ├─ organizerRoyalty%    → Organizer do evento
             │     └─ platformFee%         → Platform
             │
-            └─► TicketNFT.transferFrom(seller → buyer, tokenId)
+            └─► TicketNFTLocked.transferFrom(seller → buyer, tokenId)
 ```
 
 > O vendedor pode cancelar a listagem a qualquer momento antes da venda.
@@ -112,7 +112,7 @@ Marketplace envia ETH da royalty → RoyaltySplitter.receive()
 
 ```
 [1] Usuário A aprova TicketSwap como operador do seu NFT
-      └─► TicketNFT.approve(TicketSwap, tokenIdA)
+      └─► TicketNFTLocked.approve(TicketSwap, tokenIdA)
 
 [2] Usuário A calcula a taxa antes de propor (opcional)
       └─► TicketSwap.quoteFee(tokenIdA, tokenIdB)
@@ -123,15 +123,15 @@ Marketplace envia ETH da royalty → RoyaltySplitter.receive()
             └─ Cria Proposal com: proposer, tokenIdA, tokenIdB, feeAmount, expiresAt (agora + TTL)
 
 [4] Usuário B aprova TicketSwap como operador do seu NFT
-      └─► TicketNFT.approve(TicketSwap, tokenIdB)
+      └─► TicketNFTLocked.approve(TicketSwap, tokenIdB)
 
 [5] Usuário B aceita o swap
       └─► TicketSwap.acceptSwap(proposalId)
             │
             ├─ Valida: proposta ativa, não expirada, B dono do tokenB
             ├─ Swap atômico (mesma transação):
-            │     ├─► TicketNFT.transferFrom(A → B, tokenIdA)
-            │     └─► TicketNFT.transferFrom(B → A, tokenIdB)
+            │     ├─► TicketNFTLocked.transferFrom(A → B, tokenIdA)
+            │     └─► TicketNFTLocked.transferFrom(B → A, tokenIdB)
             │
             └─ Distribui a taxa:
                   ├─ platformShareBps%              → Platform
@@ -156,7 +156,7 @@ Marketplace envia ETH da royalty → RoyaltySplitter.receive()
                                  │ mint()
                                  ▼
                         ┌─────────────────┐
-          approve ◄─────│    TicketNFT    │─────► royaltyInfo()
+          approve ◄─────│    TicketNFTLocked    │─────► royaltyInfo()
           transferFrom   │   (ERC-721 +   │         │
                         │  ERC-2981 +    │         ▼
                         │ AccessControl) │   RoyaltySplitter

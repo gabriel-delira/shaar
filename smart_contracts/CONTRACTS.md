@@ -9,24 +9,26 @@
 
 | Contrato | Responsabilidade | Lida com pagamento? |
 |---|---|---|
-| `TicketNFT` | Emite e gerencia os NFTs de ingresso | Não |
+| `TicketNFTLocked` | Emite e gerencia os NFTs de ingresso; transfers restritos à plataforma | Não |
 | `TicketSale` | Venda primária — cria eventos e minta ingressos | Sim |
 | `TicketResale` | Mercado secundário — escrow + revenda + lock de checkout | Sim |
 | `RoyaltySplitter` | Recebe royalties de marketplaces externos e distribui | Sim |
 
 ---
 
-## TicketNFT
+## TicketNFTLocked
 
 > ERC-721 + ERC-2981 + AccessControl. Não processa pagamento; só emite e gerencia NFTs.
+> Variante com transfers restritos: apenas contratos autorizados via `grantTransferor` podem mover NFTs (garante que royalties e taxas sejam sempre cobrados). O contrato original sem restrição está em `TicketNFT.sol`.
 
 ### Roles
 
-| Role | Quem recebe | O que permite |
+| Role / Permissão | Quem recebe | O que permite |
 |---|---|---|
-| `DEFAULT_ADMIN_ROLE` | Owner (plataforma) | Conceder/revogar MINTER e OPERATOR; setar `baseURI` |
+| `DEFAULT_ADMIN_ROLE` | Owner (plataforma) | Conceder/revogar MINTER, OPERATOR e transferors; setar `baseURI` |
 | `MINTER_ROLE` | `TicketSale` (concedido no deploy) | Chamar `mint()` |
 | `OPERATOR_ROLE` | Owner (concedido a si mesmo no deploy) | Chamar `freeze()` |
+| `authorizedTransferor` | `TicketSale`, `TicketResale`, `TicketSwap` (concedido no deploy) | Executar `transferFrom`/`safeTransferFrom` — transfers diretos entre carteiras revertam |
 
 ### Funções
 
@@ -36,9 +38,9 @@ Minta um novo token ERC-721 para `p.to`. Seta os metadados on-chain (`ticketData
 - **Emite:** `TicketMinted(tokenId, eventId, buyer)`
 
 #### `freeze(tokenId, finalURI)` — `onlyRole(OPERATOR_ROLE)`
-Torna o token **soulbound** (intransferível) após o evento. Armazena a URI do IPFS com o snapshot final de metadados.
+Fixa a URI de metadados do token a um CID IPFS imutável após o evento. O token continua transferível via contratos da plataforma (pode ser revendido como colecionável), mas os metadados ficam permanentemente bloqueados.
 - **Quem chama:** Carteira operator da plataforma (job pós-evento)
-- **Restrições:** Reverte se já congelado (`AlreadyFrozen`). Qualquer tentativa de transferir token congelado reverte (`TokenFrozen`).
+- **Restrições:** Reverte se já congelado (`AlreadyFrozen`).
 - **Emite:** `Frozen(tokenId, finalURI)`
 
 #### `tokenURI(tokenId)` — view, público
@@ -53,6 +55,10 @@ Concede ou revoga `MINTER_ROLE`. Necessário após deploy de `TicketSale`.
 
 #### `grantOperator(account)` / `revokeOperator(account)` — `onlyRole(DEFAULT_ADMIN_ROLE)`
 Concede ou revoga `OPERATOR_ROLE`. Necessário para habilitar o job de freeze.
+
+#### `grantTransferor(account)` / `revokeTransferor(account)` — `onlyRole(DEFAULT_ADMIN_ROLE)`
+Autoriza ou desautoriza um endereço a executar `transferFrom`/`safeTransferFrom`. Concedido no deploy para `TicketSale`, `TicketResale` e `TicketSwap`. Qualquer outro chamador recebe `UnauthorizedTransfer`.
+- **Emite:** `TransferorGranted(account)` / `TransferorRevoked(account)`
 
 #### `getTicketData(tokenId)` — view, público
 Retorna a struct `TicketMetadata` (eventId, nome do evento, número do ingresso, assento, etc.).

@@ -44,8 +44,8 @@ forge script script/Deploy.s.sol --rpc-url http://127.0.0.1:8545 --broadcast
 
 O script:
 - Deploya MockUSDC e minta 1 M USDC para a tesouraria
-- Deploya TicketNFT, TicketSale, TicketResale
-- Concede roles (MINTER, OPERATOR)
+- Deploya TicketNFTLocked, TicketSale, TicketResale
+- Concede roles (MINTER, OPERATOR) e transferors (TicketSale, TicketResale)
 - Pré-aprova o gasto de USDC da tesouraria
 - Imprime os endereços e escreve `app/lib/contracts/addresses.local.json`
 
@@ -55,7 +55,7 @@ Copie os endereços impressos pelo deploy para `app/.env`:
 
 ```env
 USDC_ADDRESS="<MockUSDC address>"
-NEXT_PUBLIC_NFT_ADDRESS="<TicketNFT address>"
+NEXT_PUBLIC_NFT_ADDRESS="<TicketNFTLocked address>"
 NEXT_PUBLIC_SALE_ADDRESS="<TicketSale address>"
 NEXT_PUBLIC_RESALE_ADDRESS="<TicketResale address>"
 ```

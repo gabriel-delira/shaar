@@ -38,7 +38,7 @@ Quatro contratos com responsabilidades separadas:
 
 | Contrato | Responsabilidade | Paga? |
 |---|---|---|
-| `TicketNFT.sol` | Emite e gerencia os NFTs (ERC-721 + ERC-2981) | Não |
+| `TicketNFTLocked.sol` | Emite e gerencia os NFTs (ERC-721 + ERC-2981); transfers restritos à plataforma | Não |
 | `TicketSale.sol` | Venda primária — split Organizador + Plataforma | Sim |
 | `TicketResale.sol` | Mercado secundário — split Vendedor + Organizador + Plataforma | Sim |
 | `TicketSwap.sol` | Troca atômica de ingressos entre dois usuários | Sim (taxa) |
@@ -56,7 +56,8 @@ Swap:             Usuário A + B → TicketSwap → transfer atômico (ou revert
 smart_contracts/
   src/
     SubscriptionSplit.sol
-    TicketNFT.sol
+    TicketNFT.sol           ← original sem restrição de transfer (referência)
+    TicketNFTLocked.sol     ← variante deployada; transfers restritos à plataforma
     TicketSale.sol
     TicketResale.sol
     TicketSwap.sol
@@ -124,10 +125,10 @@ forge script script/Deploy.s.sol \
 
 | Padrão | Onde |
 |---|---|
-| `ERC-721` + `ERC-721URIStorage` | `TicketNFT` |
-| `ERC-2981` (royalties) | `TicketNFT` |
+| `ERC-721` + `ERC-721URIStorage` | `TicketNFTLocked` |
+| `ERC-2981` (royalties) | `TicketNFTLocked` |
 | `Ownable` | Todos |
-| `AccessControl` | `TicketNFT` (controla quem pode fazer mint) |
+| `AccessControl` | `TicketNFTLocked` (controla mint e transferors) |
 | `ReentrancyGuard` | Contratos que recebem pagamento |
 | `Pausable` | `TicketSale` (pausa de emergência por evento) |
 | `SafeERC20` | Todos que lidam com tokens ERC-20 |

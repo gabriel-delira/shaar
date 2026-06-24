@@ -1,7 +1,7 @@
 # Plataforma de Ingressos NFT — Planejamento (Caso 2)
 
 > Plataforma B2B2C sobre os contratos já implementados em `../smart_contracts/src/`
-> (`TicketNFT`, `TicketSale`, `TicketResale`, `TicketSwap`, `RoyaltySplitter`).
+> (`TicketNFTLocked`, `TicketSale`, `TicketResale`, `TicketSwap`, `RoyaltySplitter`).
 
 ---
 
@@ -24,7 +24,7 @@
 1. **Banco: PostgreSQL + Prisma.** Indexação dos eventos on-chain feita por um listener próprio (viem `watchContractEvent`) — sem subgraph no MVP.
 2. **IPFS via Pinata** para o snapshot de metadados no freeze pós-evento.
 3. **QR code de check-in é off-chain** (payload assinado pelo backend + verificação de ownership on-chain no momento do scan). Não há transação na porta do evento.
-4. **Freeze é disparado por job do admin** após o evento (a carteira da plataforma tem `OPERATOR_ROLE` no `TicketNFT`).
+4. **Freeze é disparado por job do admin** após o evento (a carteira da plataforma tem `OPERATOR_ROLE` no `TicketNFTLocked`).
 5. **Preço do evento é fixado em USDC on-chain**; o valor em BRL cobrado no PSP é calculado na hora do checkout pela cotação do dia (+ spread configurável da plataforma).
 6. **USDC direto é opção de primeira classe no checkout** (não fallback): o comprador paga com a própria carteira via `buyTicket`/`buyListedTicket`, e a embedded wallet também pode ser usada pra isso (ex.: gastando saldo de revendas). Pra essas transações assinadas pelo usuário, o gas é patrocinado via paymaster.
 
@@ -38,7 +38,7 @@
 │  Frontend (React/App Router)          API Routes (/api/*)            Worker               │
 │  ├─ Catálogo / Detalhe evento         ├─ REST (seção 5)              ├─ Indexer de        │
 │  ├─ Checkout (Privy + wagmi)          ├─ /api/metadata/:tokenId  ◄───┤   eventos on-chain │
-│  ├─ Meus ingressos (QR)               │   (baseURI do TicketNFT)     ├─ Job de expiração  │
+│  ├─ Meus ingressos (QR)               │   (baseURI do TicketNFTLocked) ├─ Job de expiração │
 │  ├─ Mercado de revenda                ├─ Tx server-side (admin):     └─ Job de freeze     │
 │  ├─ Dashboard organizador             │   createEvent, pause,                             │
 │  ├─ Painel admin                      │   freeze                                          │
@@ -48,7 +48,7 @@
             │                              │                             │
       ┌─────▼─────┐                 ┌──────▼──────┐               ┌──────▼──────┐
       │   Privy   │                 │  PostgreSQL │               │ Base (RPC)  │
-      │ auth +    │                 │  (Prisma)   │               │ TicketNFT   │
+      │ auth +    │                 │  (Prisma)   │               │ TicketNFTLocked│
       │ embedded  │                 └─────────────┘               │ TicketSale  │
       │ wallets   │                 ┌─────────────┐               │ TicketResale│
       └───────────┘                 │   Pinata    │               │ RoyaltySplt │
@@ -74,10 +74,10 @@
 | Ação | Assinante | Contrato |
 |---|---|---|
 | `createEvent`, `toggleEventPause`, `updatePlatformFee` | Owner/Admin (backend) | `TicketSale` |
-| `freeze` | Operator (backend) | `TicketNFT` |
+| `freeze` | Operator (backend) | `TicketNFTLocked` |
 | `buyTicketFor(eventId, comprador)` — fluxo fiat | **Tesouraria** (backend, após webhook do PSP) | `TicketSale` |
 | `buyTicket` — fluxo cripto-direto (opcional) | Comprador (carteira própria) | `TicketSale` |
-| `approve` + `listTicket` / `cancelListing` | Vendedor (embedded wallet, gas via paymaster) | `TicketNFT` + `TicketResale` |
+| `approve` + `listTicket` / `cancelListing` | Vendedor (embedded wallet, gas via paymaster) | `TicketNFTLocked` + `TicketResale` |
 | `buyListedTicketFor(listingId, comprador)` — fluxo fiat | **Tesouraria** (backend) | `TicketResale` |
 
 ---
@@ -92,7 +92,7 @@ fiat a tesouraria assina a transação, então o NFT iria pra tesouraria. Implem
 - `TicketSale.buyTicketFor(eventId, recipient)` — quem chama paga (ETH ou ERC-20), o NFT é
   mintado pro `recipient`. `buyTicket` virou atalho pra `_buyTicket(eventId, msg.sender)`.
 - `TicketResale.buyListedTicketFor(listingId, recipient)` — mesma ideia na revenda.
-- Bônus: corrigido bug pré-existente no `TicketNFT.freeze` — o `ERC721URIStorage` concatenava
+- Bônus: corrigido bug pré-existente no `TicketNFT.freeze` (herdado em `TicketNFTLocked`) — o `ERC721URIStorage` concatenava
   `baseURI` + URI congelada (gerando `https://api...//ipfs://Qm...`); agora a URI congelada é
   armazenada à parte e retornada intacta (`tokenURI` sobrescrito).
 

@@ -3,7 +3,7 @@
 ## Domain Vocabulary
 | Term | Definition |
 |------|------------|
-| Ingresso / Ticket | NFT ERC-721 (`TicketNFT`) que representa o direito de acesso a um evento. Carrega metadata on-chain (evento, número, assento, organizador, face price). |
+| Ingresso / Ticket | NFT ERC-721 (`TicketNFTLocked`) que representa o direito de acesso a um evento. Carrega metadata on-chain (evento, número, assento, organizador, face price). Transferível apenas via contratos da plataforma (`TicketResale`/`TicketSwap`). |
 | Event (on-chain) | Estrutura em `TicketSale` criada por `createEvent`; tem `onchainEventId` numérico, distinto do `id` (cuid) do `Event` no Postgres. |
 | Organizer | Entidade B2B que cria eventos. Passa por aprovação (`PENDING`→`APPROVED`) e tem uma `payoutWallet` que recebe a receita. |
 | Owner | Conta admin da plataforma on-chain (cria eventos, freeze, setBaseURI). No `signer`, é `ownerAccount`. |
@@ -14,7 +14,7 @@
 | RoyaltySplitter | Contrato deployado por evento; recebe royalties ERC-2981 e divide organizador/plataforma. |
 | PSP | Payment Service Provider (gateway PIX/cartão). Abstraído em `lib/psp` com providers `mock`/`pagarme`/`stripe`. |
 | Purchase | Registro no Postgres do ciclo de pagamento. State machine: `PENDING`→`PAID`→`MINTING`→`COMPLETED` (ou `REFUNDING`/`REFUNDED`/`FAILED`). |
-| Freeze | Ato de fixar a URI de metadata de um token a um CID IPFS imutável após o evento. O ingresso vira colecionável; continua transferível. |
+| Freeze | Ato de fixar a URI de metadata de um token a um CID IPFS imutável após o evento. O ingresso vira colecionável; continua transferível via contratos da plataforma (pode ser revendido como memória do evento). |
 | Indexer | Worker de polling (`app/worker/indexer.ts`) que sincroniza o Postgres com eventos da chain e reconcilia compras travadas. |
 | BPS | Basis points (1 bps = 0,01%). Unidade de todos os fees e royalties. `BPS = 10_000`. |
 | Server Wallet | Carteira gerenciada server-side pela Privy, usada para assinar transações on-chain em testnet/mainnet (`SIGNER_MODE=privy`). |
@@ -30,6 +30,7 @@
 - Capacidade do evento é checada no app (mintados + compras em voo) e reforçada on-chain (`maxTickets`, `0` = ilimitado). O grace period de venda é `eventTimestamp + 2h`.
 - Em não-local, o deployer **renuncia** ao `DEFAULT_ADMIN_ROLE` e transfere ownership para a `platformWallet` (Server Wallet).
 - Royalty de revenda é enforçado on-chain via ERC-2981 — o vendedor não consegue manipular.
+- Transfers diretos entre carteiras (fora da plataforma) são **bloqueados no contrato** (`TicketNFTLocked._update`) — qualquer tentativa reverte com `UnauthorizedTransfer`.
 - O QR de check-in é **rotativo** (janela HMAC de 30s) e amarrado ao dono atual do ticket; um ex-dono não consegue gerar QR válido.
 
 ## What this project is NOT
@@ -37,5 +38,5 @@
 - **Não** usa KMS/Turnkey para custódia. A assinatura on-chain consolida tudo em **Privy Server Wallets** (modo `privy`) ou chave privada local (modo `env`, só dev).
 - **Não** cobra o usuário em cripto no fluxo principal — o pagamento é fiat (PIX/cartão). O fluxo direto em USDC ainda é stub (`501`).
 - **Não** depende de cronjob on-chain. Recorrência/expiração e reconciliação são feitas pelo indexador/jobs off-chain.
-- **Não** é um marketplace genérico de NFT: ingressos só circulam dentro dos contratos da plataforma (`TicketResale`/`TicketSwap`), com escrow e splits obrigatórios.
+- **Não** é um marketplace genérico de NFT: ingressos **só podem ser transferidos** via contratos autorizados da plataforma (`TicketResale`/`TicketSwap`) — o contrato `TicketNFTLocked` reverte qualquer `transferFrom` direto entre carteiras, garantindo que royalties e taxas sejam sempre cobrados.
 - O **indexador não é a via primária** de criação de tickets/listings — é safety-net; o webhook PSP é o caminho principal.

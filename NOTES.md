@@ -19,7 +19,7 @@ Dois ajustes implementados e testados:
 
 1. **`buyTicketFor` / `buyListedTicketFor`** — novas funções em `TicketSale.sol` e `TicketResale.sol`. Necessárias porque no fluxo fiat quem assina a tx é a tesouraria (não o comprador), então sem elas o NFT iria pra carteira errada.
     
-2. **Bug de URI corrigido no `TicketNFT.sol`** — o `freeze` gerava URI corrompida (`https://api.../ipfs://Qm...`). Corrigido sobrescrevendo `tokenURI` pra tokens congelados.
+2. **Bug de URI corrigido no `TicketNFT.sol`** (herdado em `TicketNFTLocked.sol`) — o `freeze` gerava URI corrompida (`https://api.../ipfs://Qm...`). Corrigido sobrescrevendo `tokenURI` pra tokens congelados.
     
 
 **Suíte Foundry: 66/66 testes passando** (5 novos cobrindo os fluxos `*For`).
