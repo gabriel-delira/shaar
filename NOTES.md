@@ -1,4 +1,4 @@
-## O que foi feito até agora
+﻿## O que foi feito até agora
 
 ### Decisões de produto (fechadas)
 
@@ -86,13 +86,13 @@ O `POST` aceita qualquer JSON `{ charge_id, status: "paid" }` e dispara `process
 
 **Fix:** ler o corpo cru (`await req.text()`) e validar o header de assinatura do PSP (Pagar.me HMAC / `Stripe-Signature`) antes de processar. Rejeitar se inválido.
 
-### 2. `freeze()` trava permanentemente um ingresso em escrow (perda definitiva do NFT)
+### 2. `freeze()` num ingresso em escrow congela a metadata enquanto a listagem ainda esta ativa
 
 [TicketNFT.sol:101-122](vscode-webview://0pq9c75jlufe4hmtsljtsf0f98iivk4qlnubsuggusnobqlpnch2/shaar/smart_contracts/src/TicketNFT.sol#L101-L122) × [TicketResale.sol:107](vscode-webview://0pq9c75jlufe4hmtsljtsf0f98iivk4qlnubsuggusnobqlpnch2/shaar/smart_contracts/src/TicketResale.sol#L107)
 
-Quando um ingresso é listado, ele fica **em escrow** dentro do `TicketResale` (owner = contrato). Se o OPERATOR chamar `freeze(tokenId)` enquanto está listado, `_requireOwned` passa (o contrato é o dono) e o token vira soulbound. A partir daí `cancelListing`, `buyListedTicket` e `settleListedTicket` todos fazem `nft.transferFrom(address(this), …)` → `_update` reverte com `TokenFrozen`. **O NFT fica preso no contrato de revenda para sempre** — e `freeze` é irreversível (não há `unfreeze`). O endpoint admin de freeze itera todos os ingressos do evento, aumentando a chance de pegar uma listagem ativa/stale.
+`freeze()` apenas pina a URI — o token **permanece transferível** via contratos da plataforma. Portanto `cancelListing`/`buyListedTicket`/`settleListedTicket` continuam funcionando normalmente mesmo após o freeze. O único efeito colateral é cosmético: o comprador de uma revenda pós-freeze adquire um token com metadata já congelada (CID IPFS definitivo) em vez do metadata dinâmico pré-evento.
 
-**Fix:** em `freeze`, exigir que o token não esteja em escrow (`ownerOf != address(resale)`), ou pular tokens listados; alternativamente, dar um caminho de `unfreeze` administrativo. Off-chain: cancelar/settle todas as listagens antes de congelar.
+**Observação:** o endpoint admin de freeze itera todos os ingressos do evento. Recomendável encerrar listagens ativas antes de congelar para evitar que compradores vejam metadata de pós-evento antes do pagamento ser confirmado.
 
 ---
 
@@ -198,7 +198,7 @@ Assina só `tokenId:window` com janela ±1 (~90s) e não vincula a evento/portad
 3. **#3 withdrawals sem saldo** + **#5 fees pelo organizer** + **#4 settler hot key** — núcleo de integridade financeira.
 4. **#6/#7** corridas de checkout e numeração de ingresso.
 
-O lado positivo: o uso de OpenZeppelin está correto (ReentrancyGuard + checks-effects-interactions nos contratos de pagamento, ERC-2981 com royalty imutável anti-manipulação em [TicketResale.sol:190](vscode-webview://0pq9c75jlufe4hmtsljtsf0f98iivk4qlnubsuggusnobqlpnch2/shaar/smart_contracts/src/TicketResale.sol#L190), SafeERC20, soulbound pós-freeze). Os problemas são de **interação entre contratos** (freeze×escrow), **confiança off-chain** (settler/webhook) e **autorização/validação no backend** — não de matemática de tokens.
+O lado positivo: o uso de OpenZeppelin está correto (ReentrancyGuard + checks-effects-interactions nos contratos de pagamento, ERC-2981 com royalty imutável anti-manipulação em [TicketResale.sol:190](vscode-webview://0pq9c75jlufe4hmtsljtsf0f98iivk4qlnubsuggusnobqlpnch2/shaar/smart_contracts/src/TicketResale.sol#L190), SafeERC20). Os problemas são de **interação entre contratos** (freeze×escrow), **confiança off-chain** (settler/webhook) e **autorização/validação no backend** — não de matemática de tokens.
 
 Quer que eu **aplique as correções** de algum desses (sugiro começar por #1, #2 e #3), ou prefere que eu detalhe o patch de algum item específico antes?
 

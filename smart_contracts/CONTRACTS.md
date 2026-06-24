@@ -233,6 +233,5 @@ Comprador → buyListedTicket()                  [TicketResale, comprador]
 ```
 Job backend → snapshot metadados → pin Pinata (IPFS CID)
 Operator → freeze(tokenId, "ipfs://CID")       [TicketNFT, onlyRole(OPERATOR_ROLE)]
-  └─ NFT vira soulbound (intransferível)
-  └─ tokenURI passa a retornar o CID imutável
+  └─ tokenURI passa a retornar o CID imutável (token permanece transferível)
 ```

@@ -4,7 +4,8 @@ import { getAuthUser, unauthorized } from "@/lib/auth";
 import { freezeTicketOnChain } from "@/lib/onchain";
 
 // POST /api/admin/events/:id/freeze
-// Freezes every ticket for the event: pins the metadata URI on-chain and makes each NFT soulbound.
+// Freezes every ticket for the event: pins the metadata URI on-chain so it becomes immutable.
+// Tokens remain transferable after freeze — holders can still sell/swap the ticket as a collectible.
 // Optional body: { baseMetadataUrl: string } to override the metadata base URL.
 export async function POST(
   req: NextRequest,

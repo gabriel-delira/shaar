@@ -12,7 +12,7 @@ Shaar é uma plataforma de ingressos digitais para eventos ao vivo. Organizadore
 **O que diferencia:**
 - **Anti-cambismo com royalty automático:** toda revenda repassa uma % configurável ao organizador, sem que a plataforma precise policiar nada — o contrato garante.
 - **Sem taxa de conveniência escondida:** o organizador vê exatamente o que a plataforma retém.
-- **Ingresso vira lembrança:** após o evento, o ingresso se torna um colecionável digital permanente do comprador (intransferível, com arte do evento fixada em IPFS).
+- **Ingresso vira lembrança:** após o evento, o ingresso se torna um colecionável digital do comprador — metadata congelada em IPFS, transferível como qualquer NFT (pode ser vendido como memória do evento).
 - **Blockchain invisível:** o comprador só vê PIX, QR code e R$. A infraestrutura é interna.
 
 **One-liner:**

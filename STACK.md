@@ -169,7 +169,7 @@ Staff escaneia QR (payload assinado, expira em 60s)
 
 Pós-evento (job agendado):
 → snapshot metadados → pin IPFS → freeze(tokenId, ipfs://CID)
-→ NFT vira soulbound (lembrança, intransferível)
+→ metadata do NFT fica congelada com CID IPFS imutável (token permanece transferível como colecionável)
 ```
 
 ---

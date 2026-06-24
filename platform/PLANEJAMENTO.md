@@ -279,7 +279,7 @@ Vendedor depois: "Sacar via PIX" → transfere USDC pra tesouraria → plataform
 Porta: app staff escaneia QR (payload assinado, expira em 60s)
   → POST /checkin/validate → confere assinatura + ownerOf on-chain + não usado → ✓ entrada
 Pós-evento (job): snapshot metadados → pin IPFS → freeze(tokenId, ipfs://CID)
-  → NFT vira soulbound (lembrança/colecionável, intransferível)
+  → metadata do NFT fica congelada com CID IPFS imutável (token permanece transferível como colecionável)
 ```
 
 ---
@@ -333,7 +333,7 @@ Pós-evento (job): snapshot metadados → pin IPFS → freeze(tokenId, ipfs://CI
 │  └─────────────────────────────────────────────────────┘     │
 │  ┌─────────────────────────────────────────────────────┐     │
 │  │ (cinza)    Festival Z — #87 — USADO/CONGELADO 🔒    │     │
-│  │            lembrança colecionável (soulbound)       │     │
+│  │            lembrança colecionável (metadata congelada) │     │
 │  └─────────────────────────────────────────────────────┘     │
 └──────────────────────────────────────────────────────────────┘
 ```
