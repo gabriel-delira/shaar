@@ -4,15 +4,15 @@ import QRCode from "qrcode";
 import { prisma } from "@/lib/db";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 
-const QR_SECRET = process.env.QR_SECRET ?? "change-me-in-production";
+const QR_SECRET = process.env.QR_SECRET;
+if (!QR_SECRET) throw new Error("QR_SECRET env var not set — refusing to start");
 const WINDOW_SECS = 30;
 
 function makeQrPayload(tokenId: number, userId: string): string {
   const window = Math.floor(Date.now() / (WINDOW_SECS * 1000));
   const sig = createHmac("sha256", QR_SECRET)
     .update(`${tokenId}:${window}:${userId}`)
-    .digest("hex")
-    .slice(0, 16);
+    .digest("hex");
   return `shaar:v1:${tokenId}:${window}:${userId}:${sig}`;
 }
 

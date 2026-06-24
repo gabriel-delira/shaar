@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 import { lockRate } from "@/lib/fx";
@@ -30,37 +31,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "pixKey is required" }, { status: 400 });
   }
 
-  // Available balance = on-chain USDC of the organizer's payout wallet, minus
-  // amounts already committed to in-flight withdrawals (prevents double-withdrawal).
+  // Snapshot the on-chain balance once (outside the DB transaction — the chain is not
+  // transactional, but this is a read-only value that doesn't race with DB writes).
   const onchainBalance = await getUsdcBalance(organizer.payoutWallet as `0x${string}`);
-
-  const pending = await prisma.withdrawal.aggregate({
-    where:  { userId: user.id, status: { in: ["REQUESTED", "PROCESSING"] } },
-    _sum:   { amount: true },
-  });
-  const committed = Number(pending._sum.amount ?? 0);
-  const available = onchainBalance - committed;
-
-  if (amount > available) {
-    return NextResponse.json(
-      { error: "Insufficient balance", available, requested: amount },
-      { status: 422 }
-    );
-  }
 
   const fxRate    = await lockRate();
   const amountBrl = Math.round(amount * fxRate * 100) / 100;
 
-  const withdrawal = await prisma.withdrawal.create({
-    data: {
-      userId: user.id,
-      amount,
-      amountBrl,
-      fxRate,
-      pixKey,
-      status: "REQUESTED",
-    },
-  });
+  // Atomic reserve: aggregate committed amount and create the row in a single
+  // serializable transaction.  Two concurrent requests reading the same committed
+  // sum will cause one to fail with a serialization error; only the first writer wins.
+  let withdrawal: Awaited<ReturnType<typeof prisma.withdrawal.create>>;
+  try {
+    withdrawal = await prisma.$transaction(async (tx) => {
+      const pending = await tx.withdrawal.aggregate({
+        where: { userId: user.id, status: { in: ["REQUESTED", "PROCESSING"] } },
+        _sum:  { amount: true },
+      });
+      const committed = Number(pending._sum.amount ?? 0);
+      const available = onchainBalance - committed;
+
+      if (amount > available) {
+        throw Object.assign(new Error("INSUFFICIENT_BALANCE"), { available });
+      }
+
+      return tx.withdrawal.create({
+        data: { userId: user.id, amount, amountBrl, fxRate, pixKey, status: "REQUESTED" },
+      });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  } catch (err: unknown) {
+    if (err instanceof Error && err.message === "INSUFFICIENT_BALANCE") {
+      const available = (err as Error & { available: number }).available;
+      return NextResponse.json(
+        { error: "Insufficient balance", available, requested: amount },
+        { status: 422 }
+      );
+    }
+    throw err;
+  }
 
   return NextResponse.json({
     withdrawalId: withdrawal.id,

@@ -39,7 +39,8 @@ enum TicketStatus {
 
 enum ListingStatus {
   ACTIVE
-  LOCKED     // reserved: a buyer checkout is in progress (mirrors on-chain lock)
+  LOCKED       // reserved: a buyer checkout is in progress (mirrors on-chain lock)
+  CANCELLING   // calldata returned to seller; waiting for on-chain ListingCancelled event
   SOLD
   CANCELLED
   EXPIRED

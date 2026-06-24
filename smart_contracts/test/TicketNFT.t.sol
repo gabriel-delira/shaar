@@ -184,9 +184,9 @@ contract TicketNFTTest is Test {
         nft.freeze(tokenId, "ipfs://attempt");
     }
 
-    // ─── Soulbound após freeze ────────────────────────────────────────────────────
+    // ─── Transferência após freeze — token permanece transferível ────────────────
 
-    function test_FrozenToken_TransferReverts() public {
+    function test_FrozenToken_TransferSucceeds() public {
         vm.prank(minter);
         uint256 tokenId = nft.mint(_mintParams(buyer));
 
@@ -195,11 +195,11 @@ contract TicketNFTTest is Test {
 
         address recipient = makeAddr("recipient");
         vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(TicketNFT.TokenFrozen.selector, tokenId));
         nft.transferFrom(buyer, recipient, tokenId);
+        assertEq(nft.ownerOf(tokenId), recipient);
     }
 
-    function test_FrozenToken_SafeTransferReverts() public {
+    function test_FrozenToken_SafeTransferSucceeds() public {
         vm.prank(minter);
         uint256 tokenId = nft.mint(_mintParams(buyer));
 
@@ -208,8 +208,8 @@ contract TicketNFTTest is Test {
 
         address recipient = makeAddr("recipient");
         vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(TicketNFT.TokenFrozen.selector, tokenId));
         nft.safeTransferFrom(buyer, recipient, tokenId);
+        assertEq(nft.ownerOf(tokenId), recipient);
     }
 
     function test_NonFrozenToken_TransferSucceeds() public {

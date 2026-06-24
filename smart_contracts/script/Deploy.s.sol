@@ -52,15 +52,15 @@ contract Deploy is Script {
         // ── Roles ─────────────────────────────────────────────────────────────────
         nft.grantRole(nft.MINTER_ROLE(),   address(sale));
         nft.grantRole(nft.OPERATOR_ROLE(), platformWallet);
-        console.log("MINTER_ROLE  → TicketSale");
-        console.log("OPERATOR_ROLE → platformWallet:", platformWallet);
+        console.log("MINTER_ROLE  -> TicketSale");
+        console.log("OPERATOR_ROLE -> platformWallet:", platformWallet);
 
         // ── Authorized transferors (TicketNFTLocked) ──────────────────────────────
         // Apenas contratos da plataforma podem mover NFTs; transfers diretos revertam.
         nft.grantTransferor(address(sale));
         nft.grantTransferor(address(resale));
-        console.log("authorizedTransferor → TicketSale");
-        console.log("authorizedTransferor → TicketResale");
+        console.log("authorizedTransferor -> TicketSale");
+        console.log("authorizedTransferor -> TicketResale");
         // Se TicketSwap for deployado: nft.grantTransferor(address(swap));
 
         // ── baseURI ───────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ contract Deploy is Script {
 
         // ── Settler ───────────────────────────────────────────────────────────────
         resale.setSettler(treasury);
-        console.log("TicketResale settler →", treasury);
+        console.log("TicketResale settler ->", treasury);
 
         // ── Non-local: transfer ownership to Server Wallets, renounce deployer ────
         // Deployer is a throwaway key. Operational control moves to Privy Server Wallets.
@@ -87,8 +87,8 @@ contract Deploy is Script {
 
         // ── Local only: treasury pre-approves USDC spend ──────────────────────────
         if (isLocal) {
-            vm.startBroadcast(vm.envOr("TREASURY_PRIVATE_KEY",
-                bytes32(0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a)));
+            vm.startBroadcast(uint256(vm.envOr("TREASURY_PRIVATE_KEY",
+                bytes32(0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a))));
             IERC20(usdcAddr).approve(address(sale),   type(uint256).max);
             IERC20(usdcAddr).approve(address(resale), type(uint256).max);
             console.log("Treasury approved TicketSale + TicketResale for max USDC");

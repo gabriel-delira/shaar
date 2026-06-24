@@ -17,9 +17,12 @@ contract RoyaltySplitter {
     uint256 private constant BPS = 10_000;
 
     mapping(address => uint256) public pendingWithdrawals;
+    // account => token => pending ERC-20 amount (pull-payment — mirrors ETH pattern)
+    mapping(address => mapping(address => uint256)) public pendingERC20;
 
     event RoyaltyReceived(address indexed token, uint256 total, uint256 toOrganizer, uint256 toPlatform);
     event Withdrawn(address indexed account, uint256 amount);
+    event WithdrawnERC20(address indexed account, address indexed token, uint256 amount);
 
     constructor(address _organizer, address _platform, uint256 _organizerShareBps) {
         require(_organizer != address(0) && _platform != address(0), "Invalid address");
@@ -57,8 +60,11 @@ contract RoyaltySplitter {
 
     // ─── ERC-20 ────────────────────────────────────────────────────────────────
 
-    /// Some marketplaces pay royalties in ERC-20 (e.g. WETH). Since ERC-20
-    /// transfers don't trigger receive(), anyone can call this to flush the balance.
+    /// Splits the contract's entire balance of `token` between organizer and platform
+    /// using pull-payment: credits `pendingERC20` instead of pushing directly.
+    /// A reverting organizer or a token with a blocklist on one recipient cannot
+    /// permanently lock the other party's share (DoS by push / griefing).
+    /// Anyone can call this to flush the balance; each party then calls withdrawERC20.
     function releaseERC20(address token) external {
         uint256 balance = IERC20(token).balanceOf(address(this));
         require(balance > 0, "Nothing to release");
@@ -66,9 +72,18 @@ contract RoyaltySplitter {
         uint256 toOrganizer = (balance * organizerShareBps) / BPS;
         uint256 toPlatform = balance - toOrganizer;
 
-        IERC20(token).safeTransfer(organizer, toOrganizer);
-        IERC20(token).safeTransfer(platform, toPlatform);
+        pendingERC20[organizer][token] += toOrganizer;
+        pendingERC20[platform][token] += toPlatform;
 
         emit RoyaltyReceived(token, balance, toOrganizer, toPlatform);
+    }
+
+    /// Withdraws the caller's accumulated ERC-20 royalties for `token`.
+    function withdrawERC20(address token) external {
+        uint256 amount = pendingERC20[msg.sender][token];
+        require(amount > 0, "Nothing to withdraw");
+        pendingERC20[msg.sender][token] = 0;
+        IERC20(token).safeTransfer(msg.sender, amount);
+        emit WithdrawnERC20(msg.sender, token, amount);
     }
 }

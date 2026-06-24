@@ -3,7 +3,8 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/db";
 import { getAuthUser, unauthorized } from "@/lib/auth";
 
-const QR_SECRET  = process.env.QR_SECRET ?? "change-me-in-production";
+const QR_SECRET = process.env.QR_SECRET;
+if (!QR_SECRET) throw new Error("QR_SECRET env var not set — refusing to start");
 const WINDOW_SECS = 30;
 
 // Validates the rotating QR payload and returns tokenId + userId, or null if invalid.
@@ -25,10 +26,8 @@ function validateQrPayload(payload: string): { tokenId: number; userId: string }
 
   const expectedSig = createHmac("sha256", QR_SECRET)
     .update(`${tokenId}:${window}:${userId}`)
-    .digest("hex")
-    .slice(0, 16);
+    .digest("hex");
 
-  // Constant-time comparison to prevent timing-based HMAC oracle attacks
   if (sig.length !== expectedSig.length) return null;
   if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null;
 

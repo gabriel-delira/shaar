@@ -115,6 +115,21 @@ export async function getUsdcBalance(wallet: `0x${string}`): Promise<number> {
   return Number(raw) / 1_000_000;
 }
 
+/// Current on-chain owner of a token; returns null if the token does not exist.
+export async function getTokenOwner(tokenId: number): Promise<`0x${string}` | null> {
+  const { nft } = getAddresses();
+  try {
+    return (await publicClient.readContract({
+      address: nft,
+      abi: TICKET_NFT_ABI,
+      functionName: "ownerOf",
+      args: [BigInt(tokenId)],
+    })) as `0x${string}`;
+  } catch {
+    return null;
+  }
+}
+
 /// Authoritative ticket number ("#N") as recorded on-chain at mint time.
 /// Avoids the race of deriving it from an off-chain count().
 export async function getOnchainTicketNumber(tokenId: number): Promise<number> {

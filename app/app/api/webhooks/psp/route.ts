@@ -5,6 +5,23 @@ import { buyTicketOnChain, settleListedTicketOnChain, unlockListingOnChain, getO
 
 // Shared handler — receives a charge_id + status and drives the purchase state machine.
 export async function processPspPayment(chargeId: string): Promise<{ ok: boolean; message: string }> {
+  // Atomic idempotency: claim the purchase in a single write — only succeeds if it is
+  // still PENDING.  Concurrent webhooks for the same charge_id both try this; exactly
+  // one wins (count === 1) and the other returns early without a second mint/settle.
+  const claimed = await prisma.purchase.updateMany({
+    where: { pspChargeId: chargeId, status: "PENDING" },
+    data:  { status: "PAID", paidAt: new Date() },
+  });
+
+  if (claimed.count !== 1) {
+    const existing = await prisma.purchase.findUnique({ where: { pspChargeId: chargeId } });
+    if (!existing) return { ok: false, message: "Purchase not found" };
+    if (existing.status === "COMPLETED" || existing.status === "REFUNDED") {
+      return { ok: true, message: `Already ${existing.status}` };
+    }
+    return { ok: false, message: `Unexpected status: ${existing.status}` };
+  }
+
   const purchase = await prisma.purchase.findUnique({
     where: { pspChargeId: chargeId },
     include: {
@@ -14,16 +31,7 @@ export async function processPspPayment(chargeId: string): Promise<{ ok: boolean
     },
   });
 
-  if (!purchase) return { ok: false, message: "Purchase not found" };
-
-  // Idempotency guard
-  if (purchase.status === "COMPLETED" || purchase.status === "REFUNDED") {
-    return { ok: true, message: `Already ${purchase.status}` };
-  }
-
-  if (purchase.status !== "PENDING") {
-    return { ok: false, message: `Unexpected status: ${purchase.status}` };
-  }
+  if (!purchase) return { ok: false, message: "Purchase not found after claim" };
 
   // Buyer wallet (embedded wallet created by Privy)
   const recipientWallet = purchase.user.walletAddress;
@@ -31,12 +39,6 @@ export async function processPspPayment(chargeId: string): Promise<{ ok: boolean
     await triggerRefund(purchase.id, purchase.pspChargeId, Number(purchase.amountBrl), purchase.listing?.onchainListingId ?? null);
     return { ok: false, message: "Buyer has no wallet; refunded" };
   }
-
-  // Mark PAID
-  await prisma.purchase.update({
-    where: { id: purchase.id },
-    data:  { status: "PAID", paidAt: new Date() },
-  });
 
   // ── Resale flow ───────────────────────────────────────────────────────────────
   if (purchase.listingId && purchase.listing) {

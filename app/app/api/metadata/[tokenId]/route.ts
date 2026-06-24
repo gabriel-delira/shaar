@@ -49,9 +49,7 @@ export async function GET(
       { trait_type: "Data",              value: event.eventDate.toISOString() },
       { display_type: "number", trait_type: "Número do Ingresso", value: ticket.ticketNumber },
       ...(ticket.seat ? [{ trait_type: "Assento", value: ticket.seat }] : []),
-      { trait_type: "Status",            value: ticket.status },
       { display_type: "number", trait_type: "Token ID", value: tokenId },
-      { trait_type: "Preço de Face",     value: `${ticket.facePrice} USDC` },
     ],
   };
 

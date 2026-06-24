@@ -5,7 +5,7 @@ import { publicClient } from "@/lib/chain";
 import { getAddresses } from "@/lib/contracts/addresses";
 import { TICKET_SALE_ABI, TICKET_NFT_ABI, TICKET_RESALE_ABI } from "@/lib/contracts/abis";
 import { prisma } from "@/lib/db";
-import { getOnchainTicketNumber, unlockListingOnChain } from "@/lib/onchain";
+import { getOnchainTicketNumber, getTokenOwner, unlockListingOnChain } from "@/lib/onchain";
 import { psp } from "@/lib/psp";
 
 const POLL_INTERVAL_MS      = 4_000;          // 4 s — fine for Anvil/Base (2 s block time)
@@ -172,11 +172,36 @@ async function syncTicketResale(resaleAddress: `0x${string}`) {
 async function reconcileStuckMinting() {
   const cutoff = new Date(Date.now() - 10 * 60 * 1_000);
   const stuck = await prisma.purchase.findMany({
-    where: { status: "MINTING", mintTxHash: null, paidAt: { lt: cutoff } },
-    include: { listing: true },
+    where:   { status: "MINTING", mintTxHash: null, paidAt: { lt: cutoff } },
+    include: { listing: true, user: true },
   });
 
   for (const purchase of stuck) {
+    // Before refunding, verify on-chain that the NFT was NOT already minted/settled.
+    // If the process died after the on-chain tx succeeded but before the DB $transaction
+    // committed, the buyer already holds the NFT — refunding would give them both the
+    // ticket and the money back.
+    const recipientWallet = purchase.user.walletAddress?.toLowerCase();
+    const tokenId = purchase.listing?.tokenId ?? null;
+
+    if (tokenId !== null && recipientWallet) {
+      const onchainOwner = await getTokenOwner(tokenId).catch(() => null);
+      if (onchainOwner?.toLowerCase() === recipientWallet) {
+        // Mint/settle already completed on-chain — heal the DB instead of refunding.
+        console.warn(`[reconcile] purchase ${purchase.id} already settled on-chain (tokenId ${tokenId}), completing DB record`);
+        await prisma.$transaction([
+          ...(purchase.listing
+            ? [
+                prisma.listing.update({ where: { id: purchase.listing.id }, data: { status: "SOLD" } }),
+                prisma.ticket.updateMany({ where: { tokenId }, data: { ownerAddress: purchase.user.walletAddress!, status: "VALID" } }),
+              ]
+            : []),
+          prisma.purchase.update({ where: { id: purchase.id }, data: { status: "COMPLETED", tokenId, completedAt: new Date() } }),
+        ]);
+        continue;
+      }
+    }
+
     console.warn(`[reconcile] stuck MINTING purchase ${purchase.id}, triggering refund`);
     await prisma.purchase.update({ where: { id: purchase.id }, data: { status: "REFUNDING" } });
 
