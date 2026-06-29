@@ -109,6 +109,10 @@ contract TicketSwapTest is Test {
         vm.prank(partyA);
         swap.cancelProposal(proposalId);
 
+        // Refund is held as pull-payment; the proposer withdraws it back.
+        vm.prank(partyA);
+        swap.withdraw();
+
         assertEq(partyA.balance, before); // fee refunded
     }
 
@@ -160,6 +164,12 @@ contract TicketSwapTest is Test {
         uint256 remainder = totalFee - platformShare;
         uint256 org1 = remainder / 2;
         uint256 org2 = remainder - org1;
+
+        // Swap fees are escrowed (pull-payment); organizer/platform withdraw their cut.
+        vm.prank(organizer);
+        swap.withdraw();
+        vm.prank(platform);
+        swap.withdraw();
 
         // Both tickets are from the same organizer
         assertEq(platform.balance - platformBefore, platformShare);

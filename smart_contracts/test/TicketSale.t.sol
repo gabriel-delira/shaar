@@ -66,6 +66,12 @@ contract TicketSaleTest is Test {
         vm.prank(buyer);
         uint256 tokenId = sale.buyTicket{value: PRICE}(eventId);
 
+        // ETH primary-sale proceeds use pull-payment: each party withdraws its share.
+        vm.prank(organizer);
+        sale.withdraw();
+        vm.prank(platform);
+        sale.withdraw();
+
         assertEq(nft.ownerOf(tokenId), buyer);
         assertEq(organizer.balance - orgBefore, 0.9 ether);
         assertEq(platform.balance - platformBefore, 0.1 ether);
@@ -173,6 +179,12 @@ contract TicketSaleTest is Test {
         vm.prank(treasury);
         uint256 tid = sale.buyTicketFor{value: PRICE}(eventId, recipient);
 
+        // ETH proceeds are escrowed (pull-payment) regardless of who paid.
+        vm.prank(organizer);
+        sale.withdraw();
+        vm.prank(platform);
+        sale.withdraw();
+
         assertEq(nft.ownerOf(tid), recipient);
         assertEq(organizer.balance - orgBefore, 0.9 ether);
         assertEq(platform.balance - platformBefore, 0.1 ether);
@@ -264,6 +276,12 @@ contract TicketSaleTest is Test {
         (bool ok,) = splitterAddr.call{value: 1 ether}("");
         assertTrue(ok);
 
+        // RoyaltySplitter uses pull-payment: each party withdraws its credited share.
+        vm.prank(organizer);
+        splitter.withdraw();
+        vm.prank(platform);
+        splitter.withdraw();
+
         // 70% to organizer, 30% to platform
         assertEq(organizer.balance - orgBefore, 0.7 ether);
         assertEq(platform.balance - platformBefore, 0.3 ether);
@@ -285,7 +303,14 @@ contract TicketSaleTest is Test {
         uint256 orgBefore = usdc.balanceOf(organizer);
         uint256 platformBefore = usdc.balanceOf(platform);
 
-        RoyaltySplitter(payable(splitterAddr)).releaseERC20(address(usdc));
+        RoyaltySplitter splitter = RoyaltySplitter(payable(splitterAddr));
+        splitter.releaseERC20(address(usdc));
+
+        // ERC-20 royalties are also pull-payment: each party withdraws its share.
+        vm.prank(organizer);
+        splitter.withdrawERC20(address(usdc));
+        vm.prank(platform);
+        splitter.withdrawERC20(address(usdc));
 
         assertEq(usdc.balanceOf(organizer) - orgBefore, 70e18);   // 70%
         assertEq(usdc.balanceOf(platform) - platformBefore, 30e18); // 30%

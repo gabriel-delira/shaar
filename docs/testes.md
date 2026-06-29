@@ -42,29 +42,26 @@ mockados — **nada conecta em banco, chain ou Privy**.
 ## 2. Smart contracts (`smart_contracts/`) — Foundry
 
 Já havia suíte para `TicketNFT`, `TicketSale`, `TicketResale`, `TicketSwap`.
-Foi adicionada a suíte **dedicada** que faltava:
+Foi adicionada a suíte **dedicada** que faltava, e as suítes existentes foram
+**corrigidas** para o modelo pull-payment. **`forge test` → 83 passam, 0 falham.**
 
 | Arquivo | Regra / invariante |
 |---|---|
-| `test/RoyaltySplitter.t.sol` | **Split de royalties ERC-2981 com pull-payment.** Construtor valida endereços e share ≤ 100%; `receive()` divide ETH por BPS (70/30) e **acumula** em `pendingWithdrawals`; `withdraw` transfere e zera; **um destinatário que reverte não bloqueia o outro** (isolamento do pull-payment); espelho em ERC-20 (`releaseERC20`/`withdrawERC20`), incluindo `releaseERC20` chamável por qualquer um. **14 testes, todos passando.** |
+| `test/RoyaltySplitter.t.sol` | **Split de royalties ERC-2981 com pull-payment.** Construtor valida endereços e share ≤ 100%; `receive()` divide ETH por BPS (70/30) e **acumula** em `pendingWithdrawals`; `withdraw` transfere e zera; **um destinatário que reverte não bloqueia o outro** (isolamento do pull-payment); espelho em ERC-20 (`releaseERC20`/`withdrawERC20`), incluindo `releaseERC20` chamável por qualquer um. **14 testes.** |
 
-### ⚠️ Achado: suítes existentes quebradas (pré-existente, NÃO causado por estes testes)
+### Correção das suítes existentes (migração para pull-payment)
 
-Ao rodar `forge test` completo: **75 passam, 8 falham**. As 8 falhas estão em
-`TicketSale.t.sol`, `TicketResale.t.sol` e `TicketSwap.t.sol` (arquivos que **não
-foram tocados**). O padrão é sempre o mesmo — o teste espera um **push** direto
-(ex.: saldo do organizador +0.7 ETH) mas recebe 0:
+Os contratos foram migrados para **pull-payment** (creditam `pendingWithdrawals` /
+`pendingERC20` em vez de transferir na hora), mas 8 testes antigos ainda afirmavam
+o comportamento *push* e falhavam (`0 != <esperado>`). Foram atualizados para
+**sacar via `withdraw()` antes de checar saldos** — refletindo o fluxo real:
 
-```
-[FAIL] test_RoyaltySplitter_SplitsETH()  -> 0 != 700000000000000000
-[FAIL] test_BuyTicketETH()               -> 0 != 900000000000000000
-[FAIL] test_BuyListedTicket_Split()      -> 0 != 70000000000000000
-... (8 no total)
-```
+| Arquivo | Testes corrigidos | O que mudou |
+|---|---|---|
+| `test/TicketSale.t.sol` | `test_BuyTicketETH`, `test_BuyTicketFor_MintsToRecipient` | venda primária em **ETH** é escrow → organizer/platform sacam via `sale.withdraw()` (ERC-20 continua push, sem mudança) |
+| `test/TicketSale.t.sol` | `test_RoyaltySplitter_SplitsETH`, `test_RoyaltySplitter_SplitsERC20` | royalty no splitter é pull → `splitter.withdraw()` / `releaseERC20`+`withdrawERC20` |
+| `test/TicketResale.t.sol` | `test_BuyListedTicket_Split`, `test_BuyListedTicketFor_DeliversToRecipient` | seller/platform são push; o **royalty ERC-2981** vai pro RoyaltySplitter do evento (pull) → saca via `splitter.withdraw()` |
+| `test/TicketSwap.t.sol` | `test_FeeSplit_ToOrganizerAndPlatform`, `test_CancelProposal_RefundsFee` | taxas de swap e o **refund do cancel** são escrow → `swap.withdraw()` |
 
-**Causa provável:** o `RoyaltySplitter` (e o caminho de split de `TicketSale`/
-`TicketResale`) foi migrado para **pull-payment** (credita `pendingWithdrawals`
-em vez de transferir na hora), mas essas suítes antigas continuam afirmando o
-comportamento push antigo. Precisam ser atualizadas para sacar via `withdraw()`
-antes de checar saldos. **Fora do escopo desta tarefa** (são testes pré-existentes),
-mas é uma dívida real a corrigir — avise se quiser que eu ajuste.
+> Apenas arquivos de teste foram alterados; **nenhum contrato em `src/` foi tocado** —
+> as mudanças só alinham os testes ao modelo pull-payment já implementado.

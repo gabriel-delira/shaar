@@ -5,6 +5,7 @@ import "forge-std/Test.sol";
 import "../src/TicketNFT.sol";
 import "../src/TicketSale.sol";
 import "../src/TicketResale.sol";
+import "../src/RoyaltySplitter.sol";
 
 contract TicketResaleTest is Test {
     TicketNFT public nft;
@@ -177,6 +178,14 @@ contract TicketResaleTest is Test {
         uint256 orgFromRoyalty      = (royaltyAmount * ROYALTY_ORG_SHARE_BPS) / 10_000;
         uint256 platformFromRoyalty = royaltyAmount - orgFromRoyalty;
 
+        // The on-chain royalty (ERC-2981) is routed to the event's RoyaltySplitter,
+        // which holds it as pull-payment — organizer/platform withdraw their cut.
+        (address splitterAddr,) = nft.royaltyInfo(tokenId, RESALE_PRICE);
+        vm.prank(organizer);
+        RoyaltySplitter(payable(splitterAddr)).withdraw();
+        vm.prank(platform);
+        RoyaltySplitter(payable(splitterAddr)).withdraw();
+
         assertEq(seller.balance   - sellerBefore,   sellerShare);
         assertEq(organizer.balance - orgBefore,      orgFromRoyalty);
         assertEq(platform.balance  - platformBefore, platformShare + platformFromRoyalty);
@@ -205,6 +214,11 @@ contract TicketResaleTest is Test {
         uint256 platformShare       = (RESALE_PRICE * PLATFORM_FEE_BPS) / 10_000;
         uint256 sellerShare         = RESALE_PRICE - royaltyAmount - platformShare;
         uint256 platformFromRoyalty = royaltyAmount - (royaltyAmount * ROYALTY_ORG_SHARE_BPS) / 10_000;
+
+        // Flush the platform's royalty cut held by the RoyaltySplitter (pull-payment).
+        (address splitterAddr,) = nft.royaltyInfo(tokenId, RESALE_PRICE);
+        vm.prank(platform);
+        RoyaltySplitter(payable(splitterAddr)).withdraw();
 
         assertEq(seller.balance   - sellerBefore,   sellerShare);
         assertEq(platform.balance - platformBefore,  platformShare + platformFromRoyalty);
